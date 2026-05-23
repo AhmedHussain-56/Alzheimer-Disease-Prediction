@@ -127,15 +127,32 @@ def test_data():
                 return jsonify({'status': 'error', 'message': 'No trained model available'}), 404
 
             # Make prediction
-            from tensorflow import keras
             # Parse filename supporting both Windows (\) and Linux (/) separators dynamically
             model_filename = latest_model.model_path.replace('\\', '/').split('/')[-1]
+            # Use TFLite version of the model to save memory
+            if model_filename.endswith('.h5'):
+                model_filename = model_filename[:-3] + '.tflite'
+            
             resolved_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'saved_models', model_filename)
-            logging.debug(f'Loading model dynamically from: {resolved_model_path}')
-            keras_model = keras.models.load_model(resolved_model_path)
-            logging.debug('Model loaded successfully')
-            predictions = keras_model.predict(img)[0]
-            logging.debug('Prediction completed')
+            logging.debug(f'Loading TFLite model from: {resolved_model_path}')
+            
+            try:
+                import tflite_runtime.interpreter as tflite
+            except ImportError:
+                from tensorflow import lite as tflite
+
+            interpreter = tflite.Interpreter(model_path=resolved_model_path)
+            interpreter.allocate_tensors()
+            
+            input_details = interpreter.get_input_details()
+            output_details = interpreter.get_output_details()
+            
+            # Make sure img is float32
+            img_input = img.astype(np.float32)
+            interpreter.set_tensor(input_details[0]['index'], img_input)
+            interpreter.invoke()
+            predictions = interpreter.get_tensor(output_details[0]['index'])[0]
+            logging.debug('TFLite prediction completed')
             pred_label = np.argmax(predictions)
             confidence = float(np.max(predictions))
             

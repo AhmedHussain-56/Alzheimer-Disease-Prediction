@@ -1,10 +1,7 @@
 import os
 import cv2
 import numpy as np
-from tensorflow import keras
-from tensorflow.keras import layers, models
-from tensorflow.keras.applications import ResNet101
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
+# TensorFlow imports are lazily loaded inside the model methods to prevent importing TensorFlow during web server startup.
 from sklearn.metrics import confusion_matrix, classification_report, accuracy_score, f1_score
 import json
 from datetime import datetime
@@ -83,6 +80,9 @@ class ResNet101Model:
     
     def build_model(self):
         """Build ResNet-101 model with transfer learning"""
+        from tensorflow import keras
+        from tensorflow.keras import layers, models
+        from tensorflow.keras.applications import ResNet101
         # Load pre-trained ResNet101
         base_model = ResNet101(weights='imagenet', include_top=False, input_shape=(self.img_size[0], self.img_size[1], 3))
         
@@ -111,6 +111,7 @@ class ResNet101Model:
     
     def train(self, X_train, y_train, X_test, y_test, epochs=20, batch_size=32):
         """Train the model"""
+        from tensorflow.keras.preprocessing.image import ImageDataGenerator
         if self.model is None:
             self.build_model()
         
@@ -168,6 +169,7 @@ class ResNet101Model:
     
     def load_model(self, path):
         """Load model"""
+        from tensorflow import keras
         verify_model_path(path)
         self.model = keras.models.load_model(path)
         logging.debug(f'Model loaded from {path}')
@@ -188,6 +190,8 @@ class UNetModel:
     
     def build_model(self):
         """Build U-Net inspired model"""
+        from tensorflow import keras
+        from tensorflow.keras import layers
         inputs = keras.Input(shape=(self.img_size[0], self.img_size[1], 3))
         
         # Encoder
@@ -230,6 +234,7 @@ class UNetModel:
     
     def train(self, X_train, y_train, X_test, y_test, epochs=20, batch_size=32):
         """Train the model"""
+        from tensorflow.keras.preprocessing.image import ImageDataGenerator
         if self.model is None:
             self.build_model()
         
@@ -284,6 +289,7 @@ class UNetModel:
     
     def load_model(self, path):
         """Load model"""
+        from tensorflow import keras
         self.model = keras.models.load_model(path)
 
 class SimpleDLModel:
@@ -297,6 +303,8 @@ class SimpleDLModel:
     
     def build_model(self):
         """Build simple CNN model"""
+        from tensorflow import keras
+        from tensorflow.keras import layers, models
         model = models.Sequential([
             layers.Conv2D(32, (3, 3), activation='relu', input_shape=(self.img_size[0], self.img_size[1], 3)),
             layers.MaxPooling2D((2, 2)),
@@ -325,6 +333,7 @@ class SimpleDLModel:
     
     def train(self, X_train, y_train, X_test, y_test, epochs=20, batch_size=32):
         """Train the model"""
+        from tensorflow.keras.preprocessing.image import ImageDataGenerator
         if self.model is None:
             self.build_model()
         
@@ -379,4 +388,5 @@ class SimpleDLModel:
     
     def load_model(self, path):
         """Load model"""
+        from tensorflow import keras
         self.model = keras.models.load_model(path)

@@ -213,22 +213,40 @@ def re_evaluate_model(model_id):
         # Check model file exists
         # Parse filename supporting both Windows (\) and Linux (/) separators dynamically
         model_filename = model_obj.model_path.replace('\\', '/').split('/')[-1]
+        if model_filename.endswith('.h5'):
+            model_filename = model_filename[:-3] + '.tflite'
         resolved_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'saved_models', model_filename)
         if not os.path.exists(resolved_model_path):
             return jsonify({'status': 'error', 'message': f'Model file not found: {resolved_model_path}'}), 404
-        
-        # Load saved model
-        from tensorflow import keras
-        keras_model = keras.models.load_model(resolved_model_path)
         
         # Load test data
         dataset_folder = os.path.join(os.path.dirname(__file__), '..', '..', 'Dataset')
         data_loader = DataLoader(dataset_folder)
         _, _, X_test, y_test = data_loader.load_train_test_data()
         
-        # Make predictions
-        predictions = keras_model.predict(X_test)
-        pred_labels = np.argmax(predictions, axis=1)
+        # Load saved model and run evaluation using TFLite
+        try:
+            import tflite_runtime.interpreter as tflite
+        except ImportError:
+            from tensorflow import lite as tflite
+
+        interpreter = tflite.Interpreter(model_path=resolved_model_path)
+        interpreter.allocate_tensors()
+        input_details = interpreter.get_input_details()
+        output_details = interpreter.get_output_details()
+        
+        predictions = []
+        pred_labels = []
+        for x in X_test:
+            x_input = np.expand_dims(x, axis=0).astype(np.float32)
+            interpreter.set_tensor(input_details[0]['index'], x_input)
+            interpreter.invoke()
+            pred = interpreter.get_tensor(output_details[0]['index'])[0]
+            predictions.append(pred)
+            pred_labels.append(np.argmax(pred))
+        
+        predictions = np.array(predictions)
+        pred_labels = np.array(pred_labels)
         
         # Calculate metrics
         from sklearn.metrics import accuracy_score, f1_score as sklearn_f1
@@ -282,20 +300,40 @@ def run_inference():
                 return jsonify({'status': 'error', 'message': 'Unauthorized'}), 403
             
             # Load model
-            from tensorflow import keras
             # Parse filename supporting both Windows (\) and Linux (/) separators dynamically
             model_filename = model_obj.model_path.replace('\\', '/').split('/')[-1]
+            if model_filename.endswith('.h5'):
+                model_filename = model_filename[:-3] + '.tflite'
             resolved_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'saved_models', model_filename)
-            keras_model = keras.models.load_model(resolved_model_path)
             
             # Load test data
             dataset_folder = os.path.join(os.path.dirname(__file__), '..', '..', 'Dataset')
             data_loader = DataLoader(dataset_folder)
             _, _, X_test, y_test = data_loader.load_train_test_data()
             
-            # Make predictions
-            predictions = keras_model.predict(X_test)
-            pred_labels = np.argmax(predictions, axis=1)
+            # Load saved model and run predictions using TFLite
+            try:
+                import tflite_runtime.interpreter as tflite
+            except ImportError:
+                from tensorflow import lite as tflite
+
+            interpreter = tflite.Interpreter(model_path=resolved_model_path)
+            interpreter.allocate_tensors()
+            input_details = interpreter.get_input_details()
+            output_details = interpreter.get_output_details()
+            
+            predictions = []
+            pred_labels = []
+            for x in X_test:
+                x_input = np.expand_dims(x, axis=0).astype(np.float32)
+                interpreter.set_tensor(input_details[0]['index'], x_input)
+                interpreter.invoke()
+                pred = interpreter.get_tensor(output_details[0]['index'])[0]
+                predictions.append(pred)
+                pred_labels.append(np.argmax(pred))
+            
+            predictions = np.array(predictions)
+            pred_labels = np.array(pred_labels)
             
             # Calculate metrics
             accuracy = np.mean(pred_labels == y_test)
