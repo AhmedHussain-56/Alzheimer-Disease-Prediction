@@ -1,0 +1,174 @@
+{% extends "base.html" %} {% block title %}Profile - Alzheimer Disease
+Prediction{% endblock %} {% block content %}
+<div
+  class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"
+>
+  <h1 class="h2 text-primary fw-bold">My Profile</h1>
+  <p class="text-muted small">
+    Manage your account information and preferences
+  </p>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold">
+          <i class="fas fa-user-edit me-2 text-primary"></i>Personal Information
+        </h5>
+      </div>
+      <div class="card-body p-4">
+        <form method="POST" action="{{ url_for('user.edit_profile') }}">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="first_name" class="form-label fw-bold"
+                >First Name</label
+              >
+              <input
+                type="text"
+                class="form-control"
+                id="first_name"
+                name="first_name"
+                value="{{ user.first_name }}"
+                required
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="last_name" class="form-label fw-bold"
+                >Last Name</label
+              >
+              <input
+                type="text"
+                class="form-control"
+                id="last_name"
+                name="last_name"
+                value="{{ user.last_name }}"
+                required
+              />
+            </div>
+
+            <div class="col-md-6">
+              <label for="username" class="form-label fw-bold">Username</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0"
+                  ><i class="fas fa-user text-muted"></i
+                ></span>
+                <input
+                  type="text"
+                  class="form-control bg-light border-start-0 ps-0"
+                  id="username"
+                  value="{{ user.username }}"
+                  disabled
+                />
+              </div>
+              <div class="form-text small">Username cannot be changed</div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="email" class="form-label fw-bold"
+                >Email Address</label
+              >
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0"
+                  ><i class="fas fa-envelope text-muted"></i
+                ></span>
+                <input
+                  type="email"
+                  class="form-control bg-light border-start-0 ps-0"
+                  id="email"
+                  value="{{ user.email }}"
+                  disabled
+                />
+              </div>
+              <div class="form-text small">Contact admin to update email</div>
+            </div>
+
+            <div class="col-12">
+              <label for="phone" class="form-label fw-bold">Phone Number</label>
+              <div class="input-group">
+                <span class="input-group-text bg-white"
+                  ><i class="fas fa-phone text-muted"></i
+                ></span>
+                <input
+                  type="tel"
+                  class="form-control"
+                  id="phone"
+                  name="phone"
+                  value="{{ user.phone or '' }}"
+                  placeholder="+1 234 567 8900"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-top d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary px-4">
+              <i class="fas fa-save me-2"></i> Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card shadow-sm border-0 mb-4 position-relative overflow-hidden">
+      <div
+        class="card-header bg-gradient-primary text-white py-4 text-center border-0"
+      >
+        <div
+          class="avatar-circle bg-white text-primary rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3"
+          style="width: 80px; height: 80px; font-size: 2rem"
+        >
+          <i class="fas fa-user"></i>
+        </div>
+        <h5 class="mb-1">{{ user.first_name }} {{ user.last_name }}</h5>
+        <p class="mb-0 opacity-75 small">{{ user.email }}</p>
+      </div>
+      <div class="card-body p-0">
+        <ul class="list-group list-group-flush">
+          <li
+            class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center"
+          >
+            <span class="text-muted small">Account Status</span>
+            <span class="badge bg-success rounded-pill px-3">Active</span>
+          </li>
+          <li
+            class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center"
+          >
+            <span class="text-muted small">Member Since</span>
+            <span class="fw-bold fs-sm"
+              >{{ user.created_at.strftime('%b %d, %Y') }}</span
+            >
+          </li>
+          <li
+            class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center"
+          >
+            <span class="text-muted small">Last Login</span>
+            <span class="fw-bold fs-sm"
+              >{{ user.updated_at.strftime('%b %d, %Y') }}</span
+            >
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-4">
+        <h6 class="fw-bold mb-3">Quick Actions</h6>
+        <div class="d-grid gap-2">
+          <a
+            href="{{ url_for('user.dashboard') }}"
+            class="btn btn-outline-secondary"
+          >
+            <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
+          </a>
+          <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger">
+            <i class="fas fa-sign-out-alt me-2"></i> Log Out
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

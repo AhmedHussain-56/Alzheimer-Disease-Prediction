@@ -1,0 +1,161 @@
+{% extends "base.html" %} {% block title %}Run Inference - Alzheimer Disease
+Prediction{% endblock %} {% block content %}
+<div
+  class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"
+>
+  <h1 class="h2 text-primary fw-bold">System Inference</h1>
+  <p class="text-muted small">Test trained models against dataset samples</p>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-5">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold">
+          <i class="fas fa-cogs me-2 text-primary"></i>Test Configuration
+        </h5>
+      </div>
+      <div class="card-body p-4">
+        {% if models %}
+        <form id="inferenceForm">
+          <div class="mb-4">
+            <label for="model_id" class="form-label fw-bold"
+              >Select Trained Model</label
+            >
+            <select
+              class="form-select form-select-lg"
+              id="model_id"
+              name="model_id"
+              required
+            >
+              <option value="">-- Choose Model --</option>
+              {% for model in models %}
+              <option value="{{ model.id }}">
+                {{ model.model_name }} (Acc: {{ "%.1f"|format(model.accuracy *
+                100) }}%)
+              </option>
+              {% endfor %}
+            </select>
+            <div class="form-text mt-2">
+              Select a model to run predictions on the test dataset.
+            </div>
+          </div>
+
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary btn-lg">
+              <i class="fas fa-play me-2"></i> Run Inference Analysis
+            </button>
+            <a
+              href="{{ url_for('admin.models_list') }}"
+              class="btn btn-outline-secondary"
+            >
+              View Model Details
+            </a>
+          </div>
+        </form>
+        {% else %}
+        <div class="text-center py-4">
+          <i class="fas fa-exclamation-circle fa-3x text-warning mb-3"></i>
+          <h5 class="text-muted">No Models Available</h5>
+          <p class="text-muted mb-3">
+            Please train a model before running inference.
+          </p>
+          <a href="{{ url_for('admin.train_model') }}" class="btn btn-primary">
+            Train New Model
+          </a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-7">
+    <div
+      class="card shadow-sm border-0 h-100"
+      id="resultsCard"
+      style="display: none"
+    >
+      <div
+        class="card-header bg-white py-3 d-flex justify-content-between align-items-center"
+      >
+        <h5 class="mb-0 fw-bold">
+          <i class="fas fa-poll me-2 text-success"></i>Inference Results
+        </h5>
+        <span
+          class="badge bg-success bg-opacity-10 text-success border border-success px-3 rounded-pill"
+          id="statusBadge"
+          style="display: none"
+          >Completed</span
+        >
+      </div>
+      <div class="card-body p-4">
+        <div id="resultsContent">
+          <div class="text-center py-5">
+            <p class="text-muted">Run inference to see results here.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %} {% block extra_js %}
+<div id="inferenceConfig" data-url="{{ url_for('admin.run_inference') }}"></div>
+
+<script>
+  document
+    .getElementById("inferenceForm")
+    .addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const modelId = document.getElementById("model_id").value;
+      const resultsCard = document.getElementById("resultsCard");
+      const resultsContent = document.getElementById("resultsContent");
+      const inferenceUrl =
+        document.getElementById("inferenceConfig").dataset.url;
+
+      resultsContent.innerHTML =
+        '<div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div> Running inference...';
+      resultsCard.style.display = "block";
+
+      try {
+        const response = await fetch(inferenceUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ model_id: modelId }),
+        });
+
+        const data = await response.json();
+
+        if (data.status === "success") {
+          document.getElementById("statusBadge").style.display = "inline-block";
+          resultsContent.innerHTML = `
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i> <strong>Inference Complete!</strong>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="metric-box">
+                            <h5>Model Accuracy</h5>
+                            <div class="metric-value text-success">${(data.accuracy * 100).toFixed(2)}%</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="metric-box">
+                            <h5>Predictions Made</h5>
+                            <div class="metric-value text-primary">${data.confusion_matrix.length}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+          resultsContent.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> Error: ${data.message}</div>`;
+        }
+      } catch (error) {
+        resultsContent.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> Error: ${error.message}</div>`;
+      }
+    });
+</script>
+{% endblock %}

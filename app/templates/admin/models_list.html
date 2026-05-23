@@ -1,0 +1,150 @@
+{% extends "base.html" %} {% block title %}Models List - Alzheimer Disease
+Prediction{% endblock %} {% block content %}
+<div class="row mb-4">
+  <div class="col-md-12">
+    <h1><i class="fas fa-list"></i> Trained Models</h1>
+    <p class="text-muted">
+      View and manage all trained models. The <strong>active</strong> model is
+      used for user predictions.
+    </p>
+  </div>
+</div>
+
+{% if models %}
+<div class="row">
+  {% for model in models %}
+  <div class="col-md-6 mb-4">
+    <div
+      class="card model-card {% if model.is_active %}border-success{% endif %}"
+    >
+      <div
+        class="card-header d-flex justify-content-between align-items-center"
+      >
+        <h5 class="mb-0"><i class="fas fa-cube"></i> {{ model.model_name }}</h5>
+        {% if model.is_active %}
+        <span class="badge bg-success"
+          ><i class="fas fa-check-circle me-1"></i>Active</span
+        >
+        {% else %}
+        <span class="badge bg-secondary"
+          ><i class="fas fa-pause-circle me-1"></i>Inactive</span
+        >
+        {% endif %}
+      </div>
+      <div class="card-body">
+        <div class="metric-box">
+          <h5>Algorithm</h5>
+          <span class="badge bg-primary">{{ model.algorithm|upper }}</span>
+        </div>
+
+        <div class="metric-box">
+          <h5>Accuracy</h5>
+          <div class="metric-value">
+            {{ "%.2f"|format(model.accuracy * 100) }}%
+          </div>
+        </div>
+
+        <div class="row mt-2">
+          <div class="col-md-6">
+            <div class="metric-box">
+              <h5>Precision</h5>
+              <div class="metric-value">
+                {{ "%.4f"|format(model.precision) }}
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="metric-box">
+              <h5>Recall</h5>
+              <div class="metric-value">{{ "%.4f"|format(model.recall) }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="metric-box">
+          <h5>F1-Score</h5>
+          <div class="metric-value">{{ "%.4f"|format(model.f1_score) }}</div>
+        </div>
+
+        <div class="metric-box">
+          <h5>Training Configuration</h5>
+          <p class="mb-1">
+            <strong>Epochs:</strong> {{ model.training_epochs }}
+          </p>
+          <p class="mb-1">
+            <strong>Batch Size:</strong> {{ model.batch_size }}
+          </p>
+          <p class="mb-0">
+            <strong>Learning Rate:</strong> {{ model.learning_rate }}
+          </p>
+        </div>
+
+        <p class="text-muted mt-3 mb-2">
+          <small
+            ><i class="fas fa-calendar"></i> Created: {{
+            model.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</small
+          >
+        </p>
+      </div>
+      <div
+        class="card-footer d-flex justify-content-between align-items-center"
+      >
+        <div>
+          <a
+            href="{{ url_for('admin.model_details', model_id=model.id) }}"
+            class="btn btn-sm btn-info"
+          >
+            <i class="fas fa-eye"></i> View Details
+          </a>
+          <a
+            href="{{ url_for('admin.run_inference') }}"
+            class="btn btn-sm btn-success"
+          >
+            <i class="fas fa-play"></i> Run Inference
+          </a>
+        </div>
+        <button
+          class="btn btn-sm {% if model.is_active %}btn-outline-danger{% else %}btn-warning{% endif %}"
+          onclick="toggleModel({{ model.id }}, this)"
+        >
+          {% if model.is_active %}
+          <i class="fas fa-power-off"></i> Deactivate {% else %}
+          <i class="fas fa-check"></i> Set Active {% endif %}
+        </button>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info">
+  <i class="fas fa-info-circle"></i> No trained models yet.
+  <a href="{{ url_for('admin.train_model') }}">Start training a model</a>
+</div>
+{% endif %} {% endblock %} {% block extra_js %}
+<script>
+  async function toggleModel(modelId, btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+
+    try {
+      const response = await fetch(`/admin/toggle-model/${modelId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const data = await response.json();
+
+      if (data.status === "success") {
+        location.reload();
+      } else {
+        alert("Error: " + data.message);
+        btn.disabled = false;
+      }
+    } catch (error) {
+      alert("Network error: " + error.message);
+      btn.disabled = false;
+    }
+  }
+</script>
+{% endblock %}

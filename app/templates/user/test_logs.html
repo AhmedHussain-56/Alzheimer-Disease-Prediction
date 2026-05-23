@@ -1,0 +1,98 @@
+{% extends "base.html" %} {% block title %}Test Logs - Alzheimer Disease
+Prediction{% endblock %} {% block content %}
+<div
+  class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"
+>
+  <h1 class="h2 text-primary fw-bold">System Logs</h1>
+  <p class="text-muted small">
+    Comprehensive history of all testing activities
+  </p>
+</div>
+
+{% if logs %}
+<div class="card shadow-sm border-0 mb-4">
+  <div class="card-header bg-white py-3">
+    <h5 class="mb-0 fw-bold">
+      <i class="fas fa-clipboard-list me-2 text-primary"></i>Activity Log
+    </h5>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="bg-light text-uppercase small text-muted">
+          <tr>
+            <th class="ps-4">Image Reference</th>
+            <th>Status</th>
+            <th>Classification Result</th>
+            <th>Confidence</th>
+            <th>Timestamp</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in logs %}
+          <tr>
+            <td class="ps-4">
+              <span class="font-monospace small bg-light p-1 rounded"
+                >{{ log.image_filename }}</span
+              >
+            </td>
+            <td>
+              {% if log.status == 'success' %}
+              <span
+                class="badge bg-success bg-opacity-10 text-success rounded-pill px-2"
+                ><i class="fas fa-check-circle me-1"></i> Success</span
+              >
+              {% else %}
+              <span
+                class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-2"
+                ><i class="fas fa-times-circle me-1"></i> Error</span
+              >
+              {% endif %}
+            </td>
+            <td>
+              {% if log.status == 'success' %}
+              <span class="fw-medium text-dark">{{ log.result_class }}</span>
+              {% else %}
+              <span class="text-muted italic">N/A</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if log.confidence %}
+              <div class="d-flex align-items-center" style="max-width: 100px">
+                <div class="progress flex-grow-1 me-2" style="height: 4px">
+                  <div
+                    class="progress-bar bg-primary"
+                    role="progressbar"
+                    style="width: {{ log.confidence * 100 }}%"
+                  ></div>
+                </div>
+                <small>{{ "%.0f"|format(log.confidence * 100) }}%</small>
+              </div>
+              {% else %}
+              <span class="text-muted">-</span>
+              {% endif %}
+            </td>
+            <td class="text-muted small">
+              {{ log.created_at.strftime('%Y-%m-%d %H:%M:%S') }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card-footer bg-white border-top-0 py-3">
+    <div class="small text-muted text-center">Showing last 50 logs</div>
+  </div>
+</div>
+{% else %}
+<div class="text-center py-5">
+  <div class="mb-4">
+    <i class="fas fa-history fa-4x text-muted opacity-25"></i>
+  </div>
+  <h4 class="text-muted">No logs recorded</h4>
+  <p class="text-muted">
+    Activity will appear here once you perform predictions.
+  </p>
+</div>
+{% endif %} {% endblock %}

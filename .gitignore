@@ -1,0 +1,64 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# User uploads and temporary files
+app/uploads/*
+!app/uploads/.gitkeep
+flask_session/
+repro_test.png
+
+# Datasets
+Dataset/
+
+# SQLite databases
+# We do NOT ignore instance/alzheimer_db.db because we need the preloaded demo database,
+# but we ignore local journals, locks, and temporary test databases.
+instance/*
+!instance/alzheimer_db.db
+*.db-journal
+*.db-shm
+*.db-wal
+test_db.db
+
+# IDEs and OS files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+.DS_Store
+Thumbs.db

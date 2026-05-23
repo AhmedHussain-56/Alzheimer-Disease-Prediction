@@ -1,0 +1,299 @@
+{% extends "base.html" %} {% block title %}Train Model - Alzheimer Disease
+Prediction{% endblock %} {% block content %}
+<div
+  class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"
+>
+  <h1 class="h2 text-primary fw-bold">Train New Model</h1>
+  <p class="text-muted small">Configure and initiate model training sessions</p>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold">
+          <i class="fas fa-sliders-h me-2 text-primary"></i>Configuration
+        </h5>
+      </div>
+      <div class="card-body p-4">
+        <form id="trainForm">
+          <div class="mb-4">
+            <label for="algorithm" class="form-label fw-bold"
+              >Select Algorithm</label
+            >
+            <select
+              class="form-select"
+              id="algorithm"
+              name="algorithm"
+              required
+            >
+              <option value="">-- Choose Architecture --</option>
+              <option value="resnet101">
+                ResNet-101 (Transfer Learning) - Recommended for High Accuracy
+              </option>
+              <option value="unet">
+                U-Net Segmentation - Best for Structural Analysis
+              </option>
+              <option value="deep_learning">
+                Deep Learning (Custom CNN) - Experimental
+              </option>
+            </select>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label for="epochs" class="form-label fw-bold">Epochs</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"
+                  ><i class="fas fa-sync-alt text-muted"></i
+                ></span>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="epochs"
+                  name="epochs"
+                  value="20"
+                  min="1"
+                  max="100"
+                  required
+                />
+              </div>
+              <div class="form-text small">iterations over the dataset</div>
+            </div>
+            <div class="col-md-6">
+              <label for="batch_size" class="form-label fw-bold"
+                >Batch Size</label
+              >
+              <div class="input-group">
+                <span class="input-group-text bg-light"
+                  ><i class="fas fa-layer-group text-muted"></i
+                ></span>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="batch_size"
+                  name="batch_size"
+                  value="32"
+                  min="8"
+                  max="128"
+                  required
+                />
+              </div>
+              <div class="form-text small">images per gradient update</div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label for="learning_rate" class="form-label fw-bold"
+              >Learning Rate</label
+            >
+            <div class="input-group">
+              <span class="input-group-text bg-light"
+                ><i class="fas fa-bolt text-muted"></i
+              ></span>
+              <input
+                type="number"
+                class="form-control"
+                id="learning_rate"
+                name="learning_rate"
+                value="0.001"
+                step="0.0001"
+                min="0.00001"
+                required
+              />
+            </div>
+            <div class="form-text small">
+              Controls adaption speed (lower is more stable)
+            </div>
+          </div>
+
+          <div class="d-grid mt-5">
+            <button type="submit" class="btn btn-primary btn-lg" id="trainBtn">
+              <i class="fas fa-play me-2"></i> Start Training Session
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold">Algorithm Guide</h5>
+      </div>
+      <div class="card-body">
+        <div class="d-flex align-items-start mb-3">
+          <div
+            class="bg-primary bg-opacity-10 text-primary p-2 rounded me-3 mt-1"
+          >
+            <i class="fas fa-brain"></i>
+          </div>
+          <div>
+            <h6 class="fw-bold mb-1">ResNet-101</h6>
+            <p class="text-muted small mb-0">
+              Deep residual learning framework. Uses pre-trained weights from
+              ImageNet. Best overall performance for classification.
+            </p>
+          </div>
+        </div>
+        <hr class="my-3" />
+        <div class="d-flex align-items-start mb-3">
+          <div
+            class="bg-success bg-opacity-10 text-success p-2 rounded me-3 mt-1"
+          >
+            <i class="fas fa-draw-polygon"></i>
+          </div>
+          <div>
+            <h6 class="fw-bold mb-1">U-Net</h6>
+            <p class="text-muted small mb-0">
+              Specialized architecture for biomedical image segmentation. Good
+              for localizing specific brain regions.
+            </p>
+          </div>
+        </div>
+        <hr class="my-3" />
+        <div class="d-flex align-items-start">
+          <div
+            class="bg-warning bg-opacity-10 text-warning p-2 rounded me-3 mt-1"
+          >
+            <i class="fas fa-network-wired"></i>
+          </div>
+          <div>
+            <h6 class="fw-bold mb-1">Custom CNN</h6>
+            <p class="text-muted small mb-0">
+              Lightweight custom architecture. Faster training but may yield
+              lower accuracy on complex patterns.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-4">
+  <div class="col-md-12">
+    <div
+      class="card shadow-sm border-0"
+      id="progressCard"
+      style="display: none"
+    >
+      <div class="card-header bg-light py-3">
+        <h5 class="mb-0 fw-bold">
+          <i class="fas fa-tasks me-2 text-secondary"></i>Training Status
+        </h5>
+      </div>
+      <div class="card-body p-4">
+        <div
+          id="trainingStatus"
+          class="d-flex align-items-center mb-3 text-primary fw-bold"
+        >
+          <span
+            class="spinner-border spinner-border-sm me-2"
+            role="status"
+            aria-hidden="true"
+          ></span>
+          Initializing training environment...
+        </div>
+
+        <div class="progress mb-3" style="height: 20px">
+          <div
+            class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+            id="progressBar"
+            role="progressbar"
+            style="width: 0%"
+          >
+            <span id="progressText" class="small fw-bold ps-2">0%</span>
+          </div>
+        </div>
+
+        <div
+          id="trainingDetails"
+          class="alert alert-secondary mb-0 small font-monospace"
+        >
+          Waiting for server response...
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %} {% block extra_js %}
+<script>
+  document
+    .getElementById("trainForm")
+    .addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const formData = {
+        algorithm: document.getElementById("algorithm").value,
+        epochs: document.getElementById("epochs").value,
+        batch_size: document.getElementById("batch_size").value,
+        learning_rate: document.getElementById("learning_rate").value,
+      };
+
+      document.getElementById("progressCard").style.display = "block";
+
+      // Smooth scroll to progress card
+      document
+        .getElementById("progressCard")
+        .scrollIntoView({ behavior: "smooth" });
+
+      document.getElementById("trainBtn").disabled = true;
+      document.getElementById("trainBtn").innerHTML =
+        '<i class="fas fa-spinner fa-spin me-2"></i> Initializing...';
+
+      try {
+        const response = await fetch('{{ url_for("admin.train_model") }}', {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
+
+        const data = await response.json();
+
+        if (data.status === "success") {
+          document.getElementById("trainingStatus").className =
+            "d-flex align-items-center mb-3 text-success fw-bold";
+          document.getElementById("trainingStatus").innerHTML =
+            `<i class="fas fa-check-circle me-2"></i> Training Completed Successfully!`;
+
+          document.getElementById("progressBar").className =
+            "progress-bar bg-success";
+          document.getElementById("progressBar").style.width = "100%";
+          document.getElementById("progressText").textContent = "100%";
+
+          document.getElementById("trainingDetails").className =
+            "alert alert-success mb-0";
+          document.getElementById("trainingDetails").innerHTML =
+            `${data.message}<br>Redirecting to models list...`;
+
+          setTimeout(() => {
+            window.location.href = '{{ url_for("admin.models_list") }}';
+          }, 2000);
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (error) {
+        document.getElementById("trainingStatus").className =
+          "d-flex align-items-center mb-3 text-danger fw-bold";
+        document.getElementById("trainingStatus").innerHTML =
+          `<i class="fas fa-exclamation-triangle me-2"></i> Training Failed`;
+
+        document.getElementById("progressBar").className =
+          "progress-bar bg-danger";
+
+        document.getElementById("trainingDetails").className =
+          "alert alert-danger mb-0";
+        document.getElementById("trainingDetails").textContent = error.message;
+
+        document.getElementById("trainBtn").disabled = false;
+        document.getElementById("trainBtn").innerHTML =
+          '<i class="fas fa-play me-2"></i> Start Training Session';
+      }
+    });
+</script>
+{% endblock %}

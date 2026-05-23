@@ -1,0 +1,235 @@
+{% extends "base.html" %} {% block title %}Model Details - Alzheimer Disease
+Prediction{% endblock %} {% block content %}
+<div
+  class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"
+>
+  <h1 class="h2 text-primary fw-bold">{{ model.model_name }}</h1>
+  <div class="btn-toolbar mb-2 mb-md-0">
+    <a
+      href="{{ url_for('admin.models_list') }}"
+      class="btn btn-sm btn-outline-secondary me-2"
+    >
+      <i class="fas fa-arrow-left me-1"></i> Back to List
+    </a>
+    <a
+      href="{{ url_for('admin.run_inference') }}"
+      class="btn btn-sm btn-primary"
+    >
+      <i class="fas fa-play me-1"></i> Run Test
+    </a>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-8">
+    <div class="card shadow-sm border-0 mb-4 h-100">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold">
+          <i class="fas fa-tachometer-alt me-2 text-primary"></i>Performance
+          Metrics
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-4 mb-4">
+          <div class="col-md-6">
+            <div
+              class="p-3 bg-light rounded border h-100 position-relative overflow-hidden"
+            >
+              <div class="position-absolute top-0 end-0 p-3 opacity-10">
+                <i class="fas fa-bullseye fa-3x text-success"></i>
+              </div>
+              <h6 class="text-uppercase text-muted ls-1 small fw-bold">
+                Accuracy
+              </h6>
+              <h2 class="text-success fw-bold mb-0">
+                {{ "%.2f"|format(model.accuracy * 100) }}%
+              </h2>
+              <div class="progress mt-2" style="height: 4px">
+                <div
+                  class="progress-bar bg-success"
+                  role="progressbar"
+                  style="width: {{ model.accuracy * 100 }}%"
+                ></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div
+              class="p-3 bg-light rounded border h-100 position-relative overflow-hidden"
+            >
+              <div class="position-absolute top-0 end-0 p-3 opacity-10">
+                <i class="fas fa-balance-scale fa-3x text-primary"></i>
+              </div>
+              <h6 class="text-uppercase text-muted ls-1 small fw-bold">
+                F1-Score
+              </h6>
+              <h2 class="text-primary fw-bold mb-0">
+                {{ "%.3f"|format(model.f1_score) }}
+              </h2>
+              <div class="progress mt-2" style="height: 4px">
+                <div
+                  class="progress-bar bg-primary"
+                  role="progressbar"
+                  style="width: {{ model.f1_score * 100 }}%"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row g-4">
+          <div class="col-md-6">
+            <div class="d-flex align-items-center p-3 border rounded">
+              <div
+                class="rounded-circle bg-info bg-opacity-10 text-info p-3 me-3"
+              >
+                <i class="fas fa-filter"></i>
+              </div>
+              <div>
+                <small class="text-muted d-block text-uppercase ls-1"
+                  >Precision</small
+                >
+                <span class="h4 fw-bold mb-0"
+                  >{{ "%.4f"|format(model.precision) }}</span
+                >
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="d-flex align-items-center p-3 border rounded">
+              <div
+                class="rounded-circle bg-warning bg-opacity-10 text-warning p-3 me-3"
+              >
+                <i class="fas fa-magnet"></i>
+              </div>
+              <div>
+                <small class="text-muted d-block text-uppercase ls-1"
+                  >Recall</small
+                >
+                <span class="h4 fw-bold mb-0"
+                  >{{ "%.4f"|format(model.recall) }}</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold">
+          <i class="fas fa-sliders-h me-2 text-secondary"></i>Training
+          Configuration
+        </h5>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <tbody>
+            <tr>
+              <td class="w-25 ps-4 text-muted fw-medium">Algorithm</td>
+              <td>
+                <span
+                  class="badge bg-primary bg-opacity-10 text-primary border border-primary px-3 py-1"
+                  >{{ model.algorithm|upper }}</span
+                >
+              </td>
+            </tr>
+            <tr>
+              <td class="w-25 ps-4 text-muted fw-medium">Epochs</td>
+              <td class="font-monospace">
+                {{ model.training_epochs }} iterations
+              </td>
+            </tr>
+            <tr>
+              <td class="w-25 ps-4 text-muted fw-medium">Batch Size</td>
+              <td class="font-monospace">{{ model.batch_size }} samples</td>
+            </tr>
+            <tr>
+              <td class="w-25 ps-4 text-muted fw-medium">Learning Rate</td>
+              <td class="font-monospace">{{ model.learning_rate }}</td>
+            </tr>
+            <tr>
+              <td class="w-25 ps-4 text-muted fw-medium">Created On</td>
+              <td>{{ model.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+            </tr>
+            <tr>
+              <td class="w-25 ps-4 text-muted fw-medium">File Path</td>
+              <td>
+                <code class="small text-muted">{{ model.model_path }}</code>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold">Deployment Status</h5>
+      </div>
+      <div class="card-body text-center p-4">
+        {% if model.is_active %}
+        <div class="mb-3">
+          <div
+            class="icon-circle bg-success text-white p-3 rounded-circle d-inline-block shadow-sm"
+          >
+            <i class="fas fa-check fa-2x"></i>
+          </div>
+        </div>
+        <h5 class="text-success fw-bold">Active & Ready</h5>
+        <p class="text-muted small">
+          This model is currently available for inference.
+        </p>
+        {% else %}
+        <div class="mb-3">
+          <div
+            class="icon-circle bg-secondary text-white p-3 rounded-circle d-inline-block"
+          >
+            <i class="fas fa-pause fa-2x"></i>
+          </div>
+        </div>
+        <h5 class="text-secondary fw-bold">Inactive</h5>
+        <p class="text-muted small">This model is archived or not deployed.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold">Management</h5>
+      </div>
+      <div class="list-group list-group-flush">
+        <a
+          href="{{ url_for('admin.performance_reports') }}"
+          class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-4"
+        >
+          <span
+            ><i class="fas fa-chart-pie me-2 text-info"></i>View Detailed
+            Report</span
+          >
+          <i class="fas fa-chevron-right text-muted small"></i>
+        </a>
+        <a
+          href="#"
+          class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-4"
+        >
+          <span
+            ><i class="fas fa-download me-2 text-secondary"></i>Download
+            Weights</span
+          >
+          <i class="fas fa-chevron-right text-muted small"></i>
+        </a>
+        <a
+          href="#"
+          class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-4 text-danger"
+        >
+          <span><i class="fas fa-trash-alt me-2"></i>Delete Model</span>
+          <i class="fas fa-chevron-right text-danger small"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

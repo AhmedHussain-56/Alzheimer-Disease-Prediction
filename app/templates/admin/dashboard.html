@@ -1,0 +1,155 @@
+{% extends "base.html" %} {% block title %}Admin Dashboard - Alzheimer Disease
+Prediction{% endblock %} {% block content %}
+<div
+  class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"
+>
+  <div>
+    <h1 class="h2 text-primary fw-bold">Admin Dashboard</h1>
+    <p class="text-muted small">System overview and management console</p>
+  </div>
+  <div class="btn-toolbar mb-2 mb-md-0">
+    <div class="btn-group me-2">
+      <button type="button" class="btn btn-sm btn-outline-secondary">
+        Reports
+      </button>
+      <button type="button" class="btn btn-sm btn-outline-secondary">
+        Settings
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-md-3">
+    <div class="dashboard-stat h-100">
+      <div class="mb-2 text-primary"><i class="fas fa-cube fa-2x"></i></div>
+      <h3>{{ models_count }}</h3>
+      <p>Trained Models</p>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="dashboard-stat h-100">
+      <div class="mb-2 text-success">
+        <i class="fas fa-chart-line fa-2x"></i>
+      </div>
+      <h3>{{ total_predictions }}</h3>
+      <p>Total Predictions</p>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="dashboard-stat h-100">
+      <div class="mb-2 text-info"><i class="fas fa-brain fa-2x"></i></div>
+      <h3>4</h3>
+      <p>Dementia Classes</p>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="dashboard-stat h-100">
+      <div class="mb-2 text-warning"><i class="fas fa-trophy fa-2x"></i></div>
+      <h3>
+        {% if best_model %}{{ "%.2f"|format(best_model.accuracy * 100) }}%{%
+        else %}N/A{% endif %}
+      </h3>
+      <p>Best Accuracy</p>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-md-6">
+    <div class="card h-100 border-0 shadow-sm">
+      <div class="card-body text-center p-5">
+        <div class="mb-3">
+          <div
+            class="icon-circle bg-primary bg-opacity-10 text-primary p-3 rounded-circle d-inline-block"
+          >
+            <i class="fas fa-flask fa-2x"></i>
+          </div>
+        </div>
+        <h4 class="card-title fw-bold">Model Training</h4>
+        <p class="card-text text-muted">
+          Train new models using ResNet, U-Net, or custom CNN architectures.
+        </p>
+        <a
+          href="{{ url_for('admin.train_model') }}"
+          class="btn btn-primary px-4 py-2 mt-2"
+        >
+          <i class="fas fa-cogs me-2"></i> Start Training
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card h-100 border-0 shadow-sm">
+      <div class="card-body text-center p-5">
+        <div class="mb-3">
+          <div
+            class="icon-circle bg-info bg-opacity-10 text-info p-3 rounded-circle d-inline-block"
+          >
+            <i class="fas fa-database fa-2x"></i>
+          </div>
+        </div>
+        <h4 class="card-title fw-bold">Dataset Management</h4>
+        <p class="card-text text-muted">
+          View class distribution and details of the training/testing datasets.
+        </p>
+        <a
+          href="{{ url_for('admin.dataset_details') }}"
+          class="btn btn-outline-info px-4 py-2 mt-2"
+        >
+          <i class="fas fa-folder-open me-2"></i> View Datasets
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-md-6">
+    <div class="card h-100 border-0 shadow-sm">
+      <div class="card-body text-center p-5">
+        <div class="mb-3">
+          <div
+            class="icon-circle bg-success bg-opacity-10 text-success p-3 rounded-circle d-inline-block"
+          >
+            <i class="fas fa-list-alt fa-2x"></i>
+          </div>
+        </div>
+        <h4 class="card-title fw-bold">My Models</h4>
+        <p class="card-text text-muted">
+          Manage your model inventory, check performance metrics and history.
+        </p>
+        <a
+          href="{{ url_for('admin.models_list') }}"
+          class="btn btn-outline-success px-4 py-2 mt-2"
+        >
+          <i class="fas fa-list me-2"></i> View Models
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card h-100 border-0 shadow-sm">
+      <div class="card-body text-center p-5">
+        <div class="mb-3">
+          <div
+            class="icon-circle bg-warning bg-opacity-10 text-warning p-3 rounded-circle d-inline-block"
+          >
+            <i class="fas fa-microscope fa-2x"></i>
+          </div>
+        </div>
+        <h4 class="card-title fw-bold">Run Inference</h4>
+        <p class="card-text text-muted">
+          Test deployed models with sample data to verify inference accuracy.
+        </p>
+        <a
+          href="{{ url_for('admin.run_inference') }}"
+          class="btn btn-outline-warning px-4 py-2 mt-2"
+        >
+          <i class="fas fa-play me-2"></i> Run Inference
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

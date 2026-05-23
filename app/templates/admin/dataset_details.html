@@ -1,0 +1,230 @@
+{% extends "base.html" %} {% block title %}Dataset Details - Alzheimer Disease
+Prediction{% endblock %} {% block content %}
+<div
+  class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"
+>
+  <h1 class="h2 text-primary fw-bold">Dataset Analytics</h1>
+  <div class="btn-toolbar mb-2 mb-md-0">
+    <button type="button" class="btn btn-sm btn-outline-secondary">
+      <i class="fas fa-download me-1"></i> Export Report
+    </button>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-md-6">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold">
+          <i class="fas fa-graduation-cap me-2 text-primary"></i>Training
+          Dataset
+        </h5>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead class="bg-light">
+            <tr>
+              <th class="ps-4">Class Label</th>
+              <th>Sample Count</th>
+              <th>Distribution</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for class_name, count in dataset_info['train'].items() %}
+            <tr>
+              <td class="ps-4">
+                {% if class_name == 'NonDemented' %}
+                <span
+                  class="badge bg-success bg-opacity-10 text-success border border-success px-2 py-1 rounded-pill"
+                  >{{ class_name }}</span
+                >
+                {% elif class_name == 'ModerateDemented' %}
+                <span
+                  class="badge bg-info bg-opacity-10 text-info border border-info px-2 py-1 rounded-pill"
+                  >{{ class_name }}</span
+                >
+                {% elif class_name == 'MildDemented' %}
+                <span
+                  class="badge bg-warning bg-opacity-10 text-warning border border-warning px-2 py-1 rounded-pill"
+                  >{{ class_name }}</span
+                >
+                {% else %}
+                <span
+                  class="badge bg-danger bg-opacity-10 text-danger border border-danger px-2 py-1 rounded-pill"
+                  >{{ class_name }}</span
+                >
+                {% endif %}
+              </td>
+              <td class="fw-bold">{{ count }}</td>
+              <td>
+                <div class="progress" style="height: 6px; width: 100px">
+                  {% set percent = (count / 5121 * 100)|round(1) %}
+                  <div
+                    class="progress-bar bg-primary"
+                    role="progressbar"
+                    style="width: {{ percent }}%"
+                  ></div>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold">
+          <i class="fas fa-flask me-2 text-info"></i>Testing Dataset
+        </h5>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead class="bg-light">
+            <tr>
+              <th class="ps-4">Class Label</th>
+              <th>Sample Count</th>
+              <th>Distribution</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for class_name, count in dataset_info['test'].items() %}
+            <tr>
+              <td class="ps-4">
+                {% if class_name == 'NonDemented' %}
+                <span
+                  class="badge bg-success bg-opacity-10 text-success border border-success px-2 py-1 rounded-pill"
+                  >{{ class_name }}</span
+                >
+                {% elif class_name == 'ModerateDemented' %}
+                <span
+                  class="badge bg-info bg-opacity-10 text-info border border-info px-2 py-1 rounded-pill"
+                  >{{ class_name }}</span
+                >
+                {% elif class_name == 'MildDemented' %}
+                <span
+                  class="badge bg-warning bg-opacity-10 text-warning border border-warning px-2 py-1 rounded-pill"
+                  >{{ class_name }}</span
+                >
+                {% else %}
+                <span
+                  class="badge bg-danger bg-opacity-10 text-danger border border-danger px-2 py-1 rounded-pill"
+                  >{{ class_name }}</span
+                >
+                {% endif %}
+              </td>
+              <td class="fw-bold">{{ count }}</td>
+              <td>
+                <div class="progress" style="height: 6px; width: 100px">
+                  {% set percent = (count / 1279 * 100)|round(1) %}
+                  <div
+                    class="progress-bar bg-info"
+                    role="progressbar"
+                    style="width: {{ percent }}%"
+                  ></div>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-4">
+  <div class="col-md-12">
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold">
+          <i class="fas fa-info-circle me-2 text-secondary"></i>Dataset
+          Specifications
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h6 class="fw-bold mb-3">Class Definitions & MMSE Scores</h6>
+            <ul class="list-group list-group-flush mb-4">
+              <li
+                class="list-group-item px-0 d-flex align-items-center border-0 pb-2"
+              >
+                <span
+                  class="badge bg-success bg-opacity-10 text-success me-3"
+                  style="width: 140px"
+                  >NonDemented</span
+                >
+                <span class="text-muted small"
+                  >No cognitive decline detected</span
+                >
+              </li>
+              <li
+                class="list-group-item px-0 d-flex align-items-center border-0 py-2"
+              >
+                <span
+                  class="badge bg-info bg-opacity-10 text-info me-3"
+                  style="width: 140px"
+                  >ModerateDemented</span
+                >
+                <span class="text-muted small"
+                  >Moderate dementia (MMSE &lt;18)</span
+                >
+              </li>
+              <li
+                class="list-group-item px-0 d-flex align-items-center border-0 py-2"
+              >
+                <span
+                  class="badge bg-warning bg-opacity-10 text-warning me-3"
+                  style="width: 140px"
+                  >MildDemented</span
+                >
+                <span class="text-muted small"
+                  >Mild cognitive impairment (MMSE 18-23)</span
+                >
+              </li>
+              <li
+                class="list-group-item px-0 d-flex align-items-center border-0 py-2"
+              >
+                <span
+                  class="badge bg-danger bg-opacity-10 text-danger me-3"
+                  style="width: 140px"
+                  >VeryMildDemented</span
+                >
+                <span class="text-muted small"
+                  >Very mild cognitive impairment (MMSE 24-30)</span
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-6 border-start ps-md-4">
+            <h6 class="fw-bold mb-3">Technical Specifications</h6>
+            <dl class="row mb-0">
+              <dt class="col-sm-4 text-muted small text-uppercase">
+                Image Format
+              </dt>
+              <dd class="col-sm-8">MRI Brain Scans (JPEG, PNG)</dd>
+
+              <dt class="col-sm-4 text-muted small text-uppercase">
+                Dimensions
+              </dt>
+              <dd class="col-sm-8">224 x 224 pixels (Standardized)</dd>
+
+              <dt class="col-sm-4 text-muted small text-uppercase">Channels</dt>
+              <dd class="col-sm-8">3 (RGB) or 1 (Grayscale - converted)</dd>
+
+              <dt class="col-sm-4 text-muted small text-uppercase">
+                Total Samples
+              </dt>
+              <dd class="col-sm-8">6,400 Images (approx)</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

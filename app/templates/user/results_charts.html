@@ -1,0 +1,234 @@
+{% extends "base.html" %} {% block title %}Results Charts - Alzheimer Disease
+Prediction{% endblock %} {% block extra_css %}
+<style>
+  .chart-container {
+    position: relative;
+    height: 350px;
+    width: 100%;
+  }
+</style>
+{% endblock %} {% block content %}
+<div
+  class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"
+>
+  <h1 class="h2 text-primary fw-bold">Analytics Dashboard</h1>
+  <div class="btn-toolbar mb-2 mb-md-0">
+    <a
+      href="{{ url_for('user.results') }}"
+      class="btn btn-sm btn-outline-secondary"
+    >
+      <i class="fas fa-table me-1"></i> Data View
+    </a>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-md-3">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-body p-3 d-flex align-items-center">
+        <div class="bg-primary bg-opacity-10 text-primary p-3 rounded me-3">
+          <i class="fas fa-clipboard-check fa-lg"></i>
+        </div>
+        <div>
+          <h6 class="text-muted text-uppercase small ls-1 mb-1">Total Tests</h6>
+          <h3 class="mb-0 fw-bold">{{ predictions|length }}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-body p-3 d-flex align-items-center">
+        <div class="bg-success bg-opacity-10 text-success p-3 rounded me-3">
+          <i class="fas fa-percent fa-lg"></i>
+        </div>
+        <div>
+          <h6 class="text-muted text-uppercase small ls-1 mb-1">
+            Avg Confidence
+          </h6>
+          <h3 class="mb-0 fw-bold">
+            {% set avg_conf = (confidence_scores|sum / confidence_scores|length
+            * 100) if confidence_scores else 0 %} {{ "%.1f"|format(avg_conf) }}%
+          </h3>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-body p-3 d-flex align-items-center">
+        <div class="bg-info bg-opacity-10 text-info p-3 rounded me-3">
+          <i class="fas fa-arrow-up fa-lg"></i>
+        </div>
+        <div>
+          <h6 class="text-muted text-uppercase small ls-1 mb-1">
+            Highest Score
+          </h6>
+          <h3 class="mb-0 fw-bold">
+            {% set max_conf = (confidence_scores|max * 100) if confidence_scores
+            else 0 %} {{ "%.1f"|format(max_conf) }}%
+          </h3>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-body p-3 d-flex align-items-center">
+        <div class="bg-warning bg-opacity-10 text-warning p-3 rounded me-3">
+          <i class="fas fa-arrow-down fa-lg"></i>
+        </div>
+        <div>
+          <h6 class="text-muted text-uppercase small ls-1 mb-1">
+            Lowest Score
+          </h6>
+          <h3 class="mb-0 fw-bold">
+            {% set min_conf = (confidence_scores|min * 100) if confidence_scores
+            else 0 %} {{ "%.1f"|format(min_conf) }}%
+          </h3>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-6">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-header bg-white py-3 border-bottom-0">
+        <h5 class="mb-0 fw-bold">Classification Distribution</h5>
+      </div>
+      <div class="card-body">
+        <div class="chart-container">
+          <canvas id="classChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-header bg-white py-3 border-bottom-0">
+        <h5 class="mb-0 fw-bold">Confidence Trends</h5>
+      </div>
+      <div class="card-body">
+        <div class="chart-container">
+          <canvas id="confidenceChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script id="data-class-labels" type="application/json">
+  {{ class_counts.keys()|list|tojson }}
+</script>
+<script id="data-class-values" type="application/json">
+  {{ class_counts.values()|list|tojson }}
+</script>
+<script id="data-confidence-scores" type="application/json">
+  {{ confidence_scores|tojson }}
+</script>
+
+<script>
+  // Data Element
+  const classLabels = JSON.parse(
+    document.getElementById("data-class-labels").textContent,
+  );
+  const classValues = JSON.parse(
+    document.getElementById("data-class-values").textContent,
+  );
+  const rawConfidenceScores = JSON.parse(
+    document.getElementById("data-confidence-scores").textContent,
+  );
+
+  // Color Mapping
+  const colorMap = {
+    NonDemented: "#10b981", // Green
+    ModerateDemented: "#3b82f6", // Blue
+    MildDemented: "#f59e0b", // Yellow
+    VeryMildDemented: "#ef4444", // Red
+  };
+
+  const borderMap = {
+    NonDemented: "#059669",
+    ModerateDemented: "#2563eb",
+    MildDemented: "#d97706",
+    VeryMildDemented: "#dc2626",
+  };
+
+  const bgColors = classLabels.map((l) => colorMap[l] || "#9ca3af");
+  const borderColors = classLabels.map((l) => borderMap[l] || "#4b5563");
+
+  // Class Distribution Chart
+  const classCtx = document.getElementById("classChart").getContext("2d");
+  new Chart(classCtx, {
+    type: "pie",
+    data: {
+      labels: classLabels,
+      datasets: [
+        {
+          label: "Predictions",
+          data: classValues,
+          backgroundColor: bgColors,
+          borderColor: borderColors,
+          borderWidth: 2,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: "bottom",
+        },
+      },
+    },
+  });
+
+  // Confidence Distribution Chart
+  const confidenceCtx = document
+    .getElementById("confidenceChart")
+    .getContext("2d");
+  const confidenceScores = rawConfidenceScores.map((c) => c * 100);
+  new Chart(confidenceCtx, {
+    type: "line",
+    data: {
+      labels: Array.from({ length: confidenceScores.length }, (_, i) => i + 1),
+      datasets: [
+        {
+          label: "Confidence %",
+          data: confidenceScores,
+          borderColor: "#3498db",
+          backgroundColor: "rgba(52, 152, 219, 0.1)",
+          borderWidth: 2,
+          fill: true,
+          tension: 0.3,
+          pointBackgroundColor: "#3498db",
+          pointBorderColor: "#2980b9",
+          pointBorderWidth: 2,
+          pointRadius: 4,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+        },
+      },
+      scales: {
+        y: {
+          min: 0,
+          max: 100,
+          ticks: {
+            suffix: "%",
+          },
+        },
+      },
+    },
+  });
+</script>
+{% endblock %}

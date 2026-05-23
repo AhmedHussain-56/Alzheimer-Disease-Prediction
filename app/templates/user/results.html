@@ -1,0 +1,133 @@
+{% extends "base.html" %} {% block title %}Results - Alzheimer Disease
+Prediction{% endblock %} {% block content %}
+<div
+  class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"
+>
+  <h1 class="h2 text-primary fw-bold">Test Results</h1>
+  <div class="btn-toolbar mb-2 mb-md-0">
+    <a
+      href="{{ url_for('user.results_charts') }}"
+      class="btn btn-sm btn-outline-primary me-2"
+    >
+      <i class="fas fa-chart-pie me-1"></i> Visual Analytics
+    </a>
+    <button type="button" class="btn btn-sm btn-outline-secondary">
+      <i class="fas fa-download me-1"></i> Export Data
+    </button>
+  </div>
+</div>
+
+{% if predictions %}
+<div class="card shadow-sm border-0 mb-4">
+  <div class="card-header bg-white py-3">
+    <h5 class="mb-0 fw-bold">
+      <i class="fas fa-list me-2 text-primary"></i>All Predictions
+    </h5>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="bg-light text-uppercase small text-muted">
+          <tr>
+            <th class="ps-4">Image Reference</th>
+            <th>Classification</th>
+            <th>Confidence Score</th>
+            <th>Date Processed</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pred in predictions %}
+          <tr>
+            <td class="ps-4">
+              <div class="d-flex align-items-center">
+                <div class="bg-light p-2 rounded me-3 text-secondary">
+                  <i class="far fa-file-image fa-lg"></i>
+                </div>
+                <span class="fw-medium text-dark"
+                  >{{ pred.image_filename }}</span
+                >
+              </div>
+            </td>
+            <td>
+              {% if pred.predicted_class == 'NonDemented' %}
+              <span
+                class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-2 rounded-pill"
+                >Non Demented</span
+              >
+              {% elif pred.predicted_class == 'ModerateDemented' %}
+              <span
+                class="badge bg-info bg-opacity-10 text-info border border-info px-3 py-2 rounded-pill"
+                >Moderate Demented</span
+              >
+              {% elif pred.predicted_class == 'MildDemented' %}
+              <span
+                class="badge bg-warning bg-opacity-10 text-warning border border-warning px-3 py-2 rounded-pill"
+                >Mild Demented</span
+              >
+              {% elif pred.predicted_class == 'VeryMildDemented' %}
+              <span
+                class="badge bg-danger bg-opacity-10 text-danger border border-danger px-3 py-2 rounded-pill"
+                >Very Mild Demented</span
+              >
+              {% endif %}
+            </td>
+            <td>
+              <div class="d-flex align-items-center" style="width: 150px">
+                <span class="me-2 fw-bold small"
+                  >{{ "%.1f"|format(pred.confidence * 100) }}%</span
+                >
+                <div class="progress flex-grow-1" style="height: 4px">
+                  <div
+                    class="progress-bar {% if pred.confidence > 0.8 %}bg-success{% elif pred.confidence > 0.6 %}bg-info{% else %}bg-warning{% endif %}"
+                    role="progressbar"
+                    style="width: {{ pred.confidence * 100 }}%"
+                  ></div>
+                </div>
+              </div>
+            </td>
+            <td class="text-muted small">
+              <i class="far fa-calendar-alt me-1"></i> {{
+              pred.created_at.strftime('%Y-%m-%d') }}
+              <span class="ms-2"
+                ><i class="far fa-clock me-1"></i> {{
+                pred.created_at.strftime('%H:%M') }}</span
+              >
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card-footer bg-white border-top-0 py-3">
+    <nav aria-label="Table navigation">
+      <ul class="pagination pagination-sm justify-content-end mb-0">
+        <li class="page-item disabled">
+          <a class="page-link" href="#">Previous</a>
+        </li>
+        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+        <li class="page-item"><a class="page-link" href="#">2</a></li>
+        <li class="page-item"><a class="page-link" href="#">3</a></li>
+        <li class="page-item"><a class="page-link" href="#">Next</a></li>
+      </ul>
+    </nav>
+  </div>
+</div>
+{% else %}
+<div class="text-center py-5">
+  <div class="mb-4">
+    <div
+      class="icon-circle bg-light text-muted p-4 rounded-circle d-inline-block"
+    >
+      <i class="fas fa-clipboard-list fa-3x"></i>
+    </div>
+  </div>
+  <h3 class="text-muted mb-3">No test results found</h3>
+  <p class="text-muted mb-4">
+    Upload an MRI image to generate your first prediction.
+  </p>
+  <a href="{{ url_for('user.test_data') }}" class="btn btn-primary px-4 py-2">
+    <i class="fas fa-plus me-2"></i> New Analysis
+  </a>
+</div>
+{% endif %} {% endblock %}
