@@ -211,12 +211,14 @@ def re_evaluate_model(model_id):
     
     try:
         # Check model file exists
-        if not os.path.exists(model_obj.model_path):
-            return jsonify({'status': 'error', 'message': f'Model file not found: {model_obj.model_path}'}), 404
+        model_filename = os.path.basename(model_obj.model_path)
+        resolved_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'saved_models', model_filename)
+        if not os.path.exists(resolved_model_path):
+            return jsonify({'status': 'error', 'message': f'Model file not found: {resolved_model_path}'}), 404
         
         # Load saved model
         from tensorflow import keras
-        keras_model = keras.models.load_model(model_obj.model_path)
+        keras_model = keras.models.load_model(resolved_model_path)
         
         # Load test data
         dataset_folder = os.path.join(os.path.dirname(__file__), '..', '..', 'Dataset')
@@ -280,7 +282,9 @@ def run_inference():
             
             # Load model
             from tensorflow import keras
-            keras_model = keras.models.load_model(model_obj.model_path)
+            model_filename = os.path.basename(model_obj.model_path)
+            resolved_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'saved_models', model_filename)
+            keras_model = keras.models.load_model(resolved_model_path)
             
             # Load test data
             dataset_folder = os.path.join(os.path.dirname(__file__), '..', '..', 'Dataset')

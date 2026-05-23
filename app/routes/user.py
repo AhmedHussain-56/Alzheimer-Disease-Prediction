@@ -128,7 +128,10 @@ def test_data():
 
             # Make prediction
             from tensorflow import keras
-            keras_model = keras.models.load_model(latest_model.model_path)
+            model_filename = os.path.basename(latest_model.model_path)
+            resolved_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'saved_models', model_filename)
+            logging.debug(f'Loading model dynamically from: {resolved_model_path}')
+            keras_model = keras.models.load_model(resolved_model_path)
             logging.debug('Model loaded successfully')
             predictions = keras_model.predict(img)[0]
             logging.debug('Prediction completed')
