@@ -128,7 +128,8 @@ def test_data():
 
             # Make prediction
             from tensorflow import keras
-            model_filename = os.path.basename(latest_model.model_path)
+            # Parse filename supporting both Windows (\) and Linux (/) separators dynamically
+            model_filename = latest_model.model_path.replace('\\', '/').split('/')[-1]
             resolved_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'saved_models', model_filename)
             logging.debug(f'Loading model dynamically from: {resolved_model_path}')
             keras_model = keras.models.load_model(resolved_model_path)
@@ -194,6 +195,9 @@ def test_data():
             test_log = TestLog(
                 user_id=user_id,
                 image_filename=secure_filename(file.filename),
+                result_class='Error',  # Fallback to satisfy NOT NULL db constraint
+                confidence=0.0,
+                processing_time=0.0,
                 status='error',
                 error_message=str(e)
             )

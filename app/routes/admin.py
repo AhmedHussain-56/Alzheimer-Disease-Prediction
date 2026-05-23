@@ -211,7 +211,8 @@ def re_evaluate_model(model_id):
     
     try:
         # Check model file exists
-        model_filename = os.path.basename(model_obj.model_path)
+        # Parse filename supporting both Windows (\) and Linux (/) separators dynamically
+        model_filename = model_obj.model_path.replace('\\', '/').split('/')[-1]
         resolved_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'saved_models', model_filename)
         if not os.path.exists(resolved_model_path):
             return jsonify({'status': 'error', 'message': f'Model file not found: {resolved_model_path}'}), 404
@@ -282,7 +283,8 @@ def run_inference():
             
             # Load model
             from tensorflow import keras
-            model_filename = os.path.basename(model_obj.model_path)
+            # Parse filename supporting both Windows (\) and Linux (/) separators dynamically
+            model_filename = model_obj.model_path.replace('\\', '/').split('/')[-1]
             resolved_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'saved_models', model_filename)
             keras_model = keras.models.load_model(resolved_model_path)
             
